@@ -1,3 +1,12 @@
+# ANSYS-APDL-Welding-Script
+
+![](image/result.gif)
+
+
+————————————————————
+
+
+
 **Note:** Hey! If you found this useful, leave a star so I know all of this was of use to someone! Thanks!
 
 ---

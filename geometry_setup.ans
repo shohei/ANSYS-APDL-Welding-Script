@@ -1,0 +1,42 @@
+/prep7
+                                                                      
+! 要素タイプ: SOLID90 (熱解析用20節点6面体)                           
+ET,1,90                                                               
+                                                                      
+! 温度依存材料特性（マイルドスチール例）                              
+MPTEMP,,,,,,,,
+MPTEMP,1,20                                                           
+MPTEMP,2,200                                                    
+MPTEMP,3,400                                                          
+MPTEMP,4,600                                                    
+MPTEMP,5,800
+MPTEMP,6,1000                                                         
+MPTEMP,7,1200
+MPTEMP,8,1500                                                         
+                                                                
+! 熱伝導率 [W/m/K]                                                    
+MPDATA,KXX,1,,51.9,48.4,45.0,36.4,26.0,26.4,29.0,29.5
+                                                                      
+! 比熱 [J/kg/K]                                                       
+MPDATA,C,1,,440,490,530,580,680,700,720,750                           
+                                                                      
+! 密度 [kg/m3]                                                  
+MPDATA,DENS,1,,7850,7830,7800,7750,7650,7550,7300,7200                
+                                                                      
+! ジオメトリ生成（直方体: 幅10mm x 高さ5mm x 長さ100mm）              
+BLOCK,0,0.01,0,0.005,0,0.1                                            
+                                                                      
+! メッシュサイズ設定                                            
+ESIZE,0.001                                                           
+                                                                
+! メッシュ生成（6面体）                                               
+MSHAPE,0,3D
+MSHKEY,1                                                              
+VMESH,ALL                                                       
+                                                                      
+! Named Selection: 熱を受ける要素（全要素）
+ESEL,ALL                                                              
+CM,HEATED_ELEMENTS,ELEM                                               
+ 
+FINISH                                                                
+             

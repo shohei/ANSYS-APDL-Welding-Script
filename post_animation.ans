@@ -1,0 +1,134 @@
+
+/post1
+
+!============================================================
+! Post-processing: Temperature Animation
+! Assumes thermal analysis results file: file.rth
+! Output: PNG frames + AVI animation
+!============================================================
+
+!------------------------------------------------------------
+! Settings - adjust as needed
+!------------------------------------------------------------
+result_file   = 'file'          ! results file name (without extension)
+output_dir    = 'anim_frames'   ! output folder for PNG frames
+anim_file     = 'weld_anim'     ! output AVI filename (without extension)
+
+T_min         = 20              ! contour min temperature [C]
+T_max         = 1600            ! contour max temperature [C] (near melting point)
+n_contours    = 16              ! number of contour levels
+
+frame_delay   = 15              ! delay between frames [1/100 sec] for AVI
+
+!------------------------------------------------------------
+! Load results file
+!------------------------------------------------------------
+FILE,%result_file%,rth
+
+!------------------------------------------------------------
+! Get total number of result sets
+! (SETZ is not supported in older versions, use SET,LAST instead)
+!------------------------------------------------------------
+SET,LAST
+*get,n_sets,active,,set,nset
+/com, Total result sets: %n_sets%
+
+!------------------------------------------------------------
+! Display settings
+!------------------------------------------------------------
+/DEVICE,VECTOR,0                ! use raster rendering
+/TRIAD,LBOT                     ! axis triad at lower-left
+/REPLOT
+
+! View angle: isometric
+/VIEW,1,1,1,1
+/ANG,1,0
+/AUTO,1
+
+! Edge display (show element outlines)
+/EDGE,1,1
+
+! Color contour settings
+/CONT,1,%n_contours%,B,%T_min%,%T_max%
+/PLOPTS,LOGO,0                  ! hide ANSYS logo
+/PLOPTS,DATE,0                  ! hide date stamp
+
+! Color theme: temperature-like (blue -> red)
+/CMAP,,NOCG,0
+/RGB,INDEX,0,0,0,0              ! background: black
+/REPLOT
+
+!------------------------------------------------------------
+! Method 1: Built-in ANSYS animation (interactive viewer)
+!   - Works in GUI mode
+!   - Displays all time steps automatically
+!------------------------------------------------------------
+! ANTIME,%n_sets%,0.5,,1,1,0,%T_min%,%T_max%
+! (uncomment the line above to use built-in animation instead)
+
+!------------------------------------------------------------
+! Method 2: Export PNG frames for each time step
+!   - Works in both GUI and batch mode
+!   - Frames can be assembled into a video externally
+!------------------------------------------------------------
+
+/SHOW,PNG                       ! redirect graphics output to PNG files
+/GFILE,800                      ! image width: 800 px
+
+*do,ii,1,n_sets
+
+    SET,,,,,,,ii                ! load the ii-th result set
+
+    ! get current solution time
+    *get,curr_time,active,,set,time
+
+    ! plot nodal temperature
+    PLNSOL,TEMP,,0
+
+    ! add title with current time
+    /TITLE, Weld Temperature [C]  -  Time = %curr_time% s
+
+    /REPLOT
+
+    /com, --- Frame %ii% / %n_sets%  (t = %curr_time% s) saved ---
+
+*enddo
+
+/SHOW,CLOSE                     ! close PNG output
+
+!------------------------------------------------------------
+! Method 3: Export AVI directly via ANIM* commands
+!   - Works in GUI mode only (requires display)
+!------------------------------------------------------------
+! /SHOW,JPEG
+! SET,FIRST
+! PLNSOL,TEMP,,0
+! ANTIME,%n_sets%,0.5,,1,1,0,%T_min%,%T_max%
+! ANCNTR,%n_sets%,%frame_delay%     ! save to AVI
+! /SHOW,CLOSE
+
+!------------------------------------------------------------
+! Summary output: min/max temperature at each step
+!------------------------------------------------------------
+/com,
+/com, ====== Temperature Summary ======
+/com, Step | Time [s] | T_min [C] | T_max [C]
+/com, ---------------------------------
+
+*do,ii,1,n_sets
+    SET,,,,,,,ii
+    *get,curr_time, active,,set,time
+    *get,t_node_min,plnsol,0,min
+    *get,t_node_max,plnsol,0,max
+    PLNSOL,TEMP,,0              ! needed to populate min/max
+    *get,t_node_min,plnsol,0,min
+    *get,t_node_max,plnsol,0,max
+    /com, %ii%  | %curr_time%  | %t_node_min%  | %t_node_max%
+*enddo
+
+/com,
+/com, PNG frames saved. To assemble into video, run:
+/com,   ffmpeg -r 10 -i jobname0%d.png -vcodec libx264 weld_anim.mp4
+/com, (requires ffmpeg installed on your system)
+
+FINISH

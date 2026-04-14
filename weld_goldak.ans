@@ -7,32 +7,40 @@ EQSLV,PCG
 TRNOPT,full
 NEQIT,60
 thopt,full
+!------------Debug flag-------------------------------------
+! debug = 1 : low-resolution run (~1/20 computation, for testing)
+! debug = 0 : full-resolution run
+debug = 1
 !------------Parameters (assumed unit system: MKS)---------------
 !------------Laser direction (local coord system): X-------------
 pi = 3.14159
 
-L_y = <your_value>							!y radius in local 
-L_z = <your_value>							!z radius in local 
-L_x1 = <your_value>							!x front radius in local 
-L_x2 = <your_value>							!x rear radius in local 
+L_y = 0.004							!y radius in local [m] (4mm, half-width of heat source)
+L_z = 0.003							!z radius in local [m] (3mm, penetration depth)
+L_x1 = 0.005							!x front radius in local [m] (5mm)
+L_x2 = 0.010							!x rear radius in local [m] (10mm, typically 2x front)
 
 
-ff = <your_value>						! front factor
+ff = 0.6						! front factor (typical range: 0.4-0.6)
 fr = 2-ff						! rear factor (preset, don't change)
 
-W_p = <your_value>						! W, energy
-vel = <your_value>				! velocity
-	
+W_p = 2000						! W, energy (20V * 150A * 0.67 efficiency)
+vel = 0.005				! velocity [m/s] (5 mm/s)
+
 amb_temp = 20				! ambient temperature, used to fix dead elements temp
 
-time_cool = <your_value>					! cooling time after welding was finished
+*if,debug,eq,1,then
+    time_cool = 15              ! cooling time [s] (debug: 1/20)
+*else
+    time_cool = 300             ! cooling time [s] (full)
+*endif
 
 select_ratio = 5				! multiplier for selection in a sphere
 
 L_select = L_x2 * select_ratio
 !--------------Paths---------------
 !#
-path_num = <your_value>				!number of paths
+path_num = 1				!number of paths
 *dim,x_start,array,path_num
 *dim,y_start,array,path_num
 *dim,z_start,array,path_num
@@ -43,17 +51,21 @@ path_num = <your_value>				!number of paths
 *dim,steps,array,path_num
 
 ! for more than 1 path just list items like this: "steps(1) = 120, 100, 50, ..."
-steps(1) = <your value>, <your value>, ...		!steps each path is divided in
-!starting coordinates
-x_start(1) = <your value>, <your value>, ...					
-y_start(1) = <your value>, <your value>, ...					
-z_start(1) = <your value>, <your value>, ...		
-!finish coordinates			
-x_finish(1) = <your value>, <your value>, ...				
-y_finish(1) = <your value>, <your value>, ...						
-z_finish(1) = <your value>, <your value>, ...	
+*if,debug,eq,1,then
+    steps(1) = 5    ! steps per path (debug: 1/20)
+*else
+    steps(1) = 100  ! steps per path (full)
+*endif
+!starting coordinates (weld along Z-axis, on top surface of 100x30x10mm plate)
+x_start(1) = 0.015					! center of plate width (30mm / 2) [m]
+y_start(1) = 0.010					! top surface (plate height = 10mm) [m]
+z_start(1) = 0.005					! 5mm from edge [m]
+!finish coordinates
+x_finish(1) = 0.015				! same x (straight weld) [m]
+y_finish(1) = 0.010				! same y (flat surface) [m]
+z_finish(1) = 0.095				! 5mm from far edge [m]
 ! rotation around x to point upwards normal vector (z) after all other rotations
-z_angle(1) = <your value>, <your value>, ...
+z_angle(1) = 0					! 0 deg: weld on flat horizontal surface
 		
 !------------Processing-------------
 ! cmsel,s,killed_elems		! kill elements in "killed_elems" selection
