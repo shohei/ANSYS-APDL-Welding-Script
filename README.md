@@ -3,6 +3,12 @@
 ![](image/result.gif)
 
 
+Post process
+
+```
+/post1
+ANTIME,%n_sets%,0.5,,1,1,0,%T_min%,%T_max%
+```
 ————————————————————
 
 
