@@ -20,6 +20,11 @@ ANTIME,%n_sets%,0.5,,1,1,0,%T_min%,%T_max%
 ```
 ————————————————————
 
+### Global coordinate system and Local coordinate system
+![](weld_geometry.png)
+
+### Relationship of the three local coordinate systems
+![](weld_coordinate_systems.png)
 
 
 **Note:** Hey! If you found this useful, leave a star so I know all of this was of use to someone! Thanks!
