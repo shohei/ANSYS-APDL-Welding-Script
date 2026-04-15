@@ -2,8 +2,17 @@
 
 ![](image/result.gif)
 
+### Geometry generation
+```
+/input, ‘geometry_setup’,’ans’
+```
 
-Post process
+### Thermal transient simulation
+```
+/input, ‘weld_goldak’,’ans’
+```
+
+### Post process
 
 ```
 /post1
